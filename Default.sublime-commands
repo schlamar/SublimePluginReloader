@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "Reload Plugins",
+        "command": "reload_plugins"
+    },
+]
