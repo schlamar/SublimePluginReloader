@@ -7,16 +7,18 @@ import sublime
 import sublime_plugin
 
 
-def _in_package_path(filename):
+def _in_package_path(mod_file):
     ppath = sublime.packages_path()
-    return os.path.commonprefix([filename, ppath]) == ppath
+    return os.path.commonprefix([mod_file, ppath]) == ppath
 
 
-def _is_plugin(mod_name):
+def _is_plugin(mod_file):
     '''All modules with more than one nested package are not
     considered as plugin by Sublime.
     '''
-    return len(mod_name.split('.')) <= 2
+    ppath_level = len(sublime.packages_path().split(os.sep))
+    mod_level = len(os.path.dirname(mod_file).split(os.sep))
+    return mod_level - ppath_level == 1
 
 
 def reload_plugins():
@@ -25,7 +27,7 @@ def reload_plugins():
     for mod_name, mod in sys.modules.items():
         if hasattr(mod, '__file__'):
             if _in_package_path(mod.__file__):
-                if _is_plugin(mod_name):
+                if _is_plugin(mod.__file__):
                     plugins.append(mod)
                 else:
                     libraries.append(mod_name)
@@ -34,11 +36,15 @@ def reload_plugins():
         sys.modules.pop(mod_name)
 
     for mod in plugins:
-        imp.reload(mod)
+        try:
+            imp.reload(mod)
+        except Exception as e:
+            # Some errors can happen.
+            # For example unloaded plugins are still in sys.modules.
+            print ('Can\'t reload %s: %s.' % (mod.__name__, e))
 
 
 class ReloadPluginsCommand(sublime_plugin.ApplicationCommand):
 
     def run(self):
         reload_plugins()
-
