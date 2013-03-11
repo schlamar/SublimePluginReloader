@@ -36,6 +36,7 @@ def reload_plugins():
         sys.modules.pop(mod_name)
 
     for mod in plugins:
+        print ('reloading plugin %s' % mod.__name__)
         if hasattr(mod, 'plugin_unloaded'):
             mod.plugin_unloaded()
 
