@@ -47,6 +47,9 @@ def reload_plugins():
             # For example unloaded plugins are still in sys.modules.
             print ('Can\'t reload %s: %s.' % (mod.__name__, e))
 
+        if hasattr(mod, 'plugin_loaded'):
+            mod.plugin_loaded()
+
 
 class ReloadPluginsCommand(sublime_plugin.ApplicationCommand):
 
