@@ -36,6 +36,9 @@ def reload_plugins():
         sys.modules.pop(mod_name)
 
     for mod in plugins:
+        if hasattr(mod, 'plugin_unloaded'):
+            mod.plugin_unloaded()
+
         try:
             imp.reload(mod)
         except Exception as e:
